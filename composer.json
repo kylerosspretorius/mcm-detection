@@ -1,0 +1,25 @@
+{
+    "name": "mcm/mcm-detection",
+    "description": "Package to detect mcm source and route correctly",
+    "keywords": [
+        "mcm-detection"
+    ],
+    "require": {
+        "php" : ">=5.5.0",
+        "laravel/installer": "^1.5"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.5"
+    },
+    "authors": [
+        {
+            "name": "Kyle Pretorius",
+            "email": "kyle@hyvemobile.co.za"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "MCM\\MCMDetection\\": "src"
+        }
+    }
+}

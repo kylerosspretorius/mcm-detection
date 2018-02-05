@@ -6,33 +6,42 @@
  * Time: 10:58
  */
 
+namespace MCM\MCMDetection\Tests;
+
 use PHPUnit\Framework\TestCase;
 
+use MCM\MCMDetection\MnoDetectMain;
 
 class MainTest extends TestCase {
 
-    public function testCanBeCreatedFromValidEmail() {
-
-        $this->assertInstanceOf(
-            Main::class,
-            Main::fromString('user@example.com')
-        );
-
-    }
-
-    public function testCannotBeCreatedFromInvalidEmailAddress()
+//    public function testCanBeCreatedFromValidEmail() {
+//
+//        $this->assertInstanceOf(
+//            Main::class,
+//            Main::fromString('user@example.com')
+//        );
+//
+//    }
+//
+//    public function testCannotBeCreatedFromInvalidEmailAddress()
+//    {
+//        $this->expectException(InvalidArgumentException::class);
+//
+//        Main::fromString('invalid');
+//    }
+//
+    public function testMustMatch()
     {
-        $this->expectException(InvalidArgumentException::class);
 
-        Main::fromString('invalid');
-    }
+        $hyvedetect = new MnoDetectMain();
+        $testcase1  = $hyvedetect->testConnection();
 
-    public function testCanBeUsedAsString()
-    {
-        $this->assertEquals(
-            'user@example.com',
-            Main::fromString('user@example.com')
-        );
+        var_dump($testcase1);
+
+//        $this->assertEquals(
+//            'working!',
+//            $testcase1
+//        );
     }
 
 

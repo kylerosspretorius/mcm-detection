@@ -13,6 +13,8 @@ namespace MCM\MCMDetection;
 use MCM\MCMDetection\Libs\MnoLoader;
 use MCM\MCMDetection\Libs\MnoDBConnection;
 
+use MCM\MCMDetection\Adapters\Http\HttpAdapter;
+
 /**
  * The core plugin class.
  * This is used to define internationalization, admin-specific hooks, and
@@ -46,38 +48,51 @@ class MnoDetectMain
     protected $version;
 
 
+    private $httpAdapter;
     protected $dbConnection;
 
 
-    public function __construct()
+
+    public function __construct(array $args)
     {
-        if (defined('HYVE_MNO_DETECT_VERSION')) {
-            $this->version = HYVE_MNO_DETECT_VERSION;
-        } else {
-            $this->version = '2.1.2';
+
+        /**
+         * Automatically assign all variables from main class file on initialization
+         */
+        foreach ( array_merge($args['config'], $args['libraries'], $args['']) as $key => $val ) {
+            $this->{$key} = $val;
         }
 
-        if (defined('HYVE_MNO_DETECT_PLUGIN_NAME')) {
-            $this->plugin_name = HYVE_MNO_DETECT_VERSION;
-        } else {
+        if (empty($this->version)) {
+            $this->version = '2.0.1';
+        }
+
+        if (empty($this->version)) {
             $this->plugin_name = 'Hyve-MNO-Detection-Library';
         }
 
 
-        /** Load the arguments */
-        //$this->loader = new MnoLoader();
+    }
 
-
-        /** Establish connection to the database */
-        $this->dbConnection = new MnoDBConnection();
+    public function detect($payload)
+    {
 
     }
 
-    public function testConnection()
+    /**
+     * Setting http adapter for Guzzle
+     */
+    public function getHttpAdapter() : HttpAdapter
     {
-        $testData = $this->dbConnection->query("SELECT * FROM wp_msisdn_store");
+        return $this->httpAdapter;
+    }
 
-        var_dump($testData);
+    /**
+     * Establish connection to the database
+     */
+    public function getDbConnection() : MnoDBConnection
+    {
+        return $this->dbConnection;
     }
 
 }

@@ -8,6 +8,8 @@
 
 namespace MCM\MCMDetection\Libs;
 
+use HyveMnoDetect;
+
 class MnoDBConnection
 {
 
@@ -32,14 +34,15 @@ class MnoDBConnection
     {
 
         $this->host = empty(defined('MNO_DB_SERVER')) ? 'localhost' : defined('MNO_DB_SERVER');
-        $this->user = empty(defined('MNO_DB_USER')) ? 'root' : defined('MNO_DB_USER');
+        $this->user = empty(defined('MNO_DB_USER')) ? 'ubuntu' : defined('MNO_DB_USER');
         $this->pass = empty(defined('MNO_DB_PASSWORD')) ? '' : defined('MNO_DB_PASSWORD');
         $this->db = empty(defined('MNO_DB_DATABASE')) ? 'MCMCampaign' : defined('MNO_DB_DATABASE');
 
-
+        var_dump($this->host . ' ' .  $this->user . ' ' .  $this->pass . ' ' . $this->db);
         try {
 
             $this->connection = new \mysqli( $this->host, $this->user, $this->pass, $this->db );
+
 
         } catch (\Exception $e){
             $error = $e->getMessage();
@@ -49,7 +52,7 @@ class MnoDBConnection
         return $this->connection;
     }
 
-    public function query($query)
+    public function get_results($query)
     {
         return $this->connection->query($query);
     }

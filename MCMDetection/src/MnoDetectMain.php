@@ -10,6 +10,9 @@
 namespace MCM\MCMDetection;
 
 
+use MCM\MCMDetection\Libs\MnoDetectCrypt;
+use MCM\MCMDetection\Libs\MnoDetectHeaderEnrichment;
+use MCM\MCMDetection\Libs\MnoDetectIPChecker;
 use MCM\MCMDetection\Libs\MnoLoader;
 use MCM\MCMDetection\Libs\MnoDBConnection;
 
@@ -49,9 +52,10 @@ class MnoDetectMain
 
 
     private $httpAdapter;
-    protected $dbConnection;
-
-
+    private $dbConnection;
+    private $ipChecker;
+    private $headerChecker;
+    private $mcyptChecker;
 
     public function __construct(array $args)
     {
@@ -59,7 +63,7 @@ class MnoDetectMain
         /**
          * Automatically assign all variables from main class file on initialization
          */
-        foreach ( array_merge($args['config'], $args['libraries'], $args['']) as $key => $val ) {
+        foreach ( array_merge($args['config'], $args['adapters'], $args['helpers']) as $key => $val ) {
             $this->{$key} = $val;
         }
 
@@ -70,12 +74,6 @@ class MnoDetectMain
         if (empty($this->version)) {
             $this->plugin_name = 'Hyve-MNO-Detection-Library';
         }
-
-
-    }
-
-    public function detect($payload)
-    {
 
     }
 
@@ -93,6 +91,34 @@ class MnoDetectMain
     public function getDbConnection() : MnoDBConnection
     {
         return $this->dbConnection;
+    }
+
+    /**
+     * @return MnoDetectIPChecker
+     * Class to include methods to extract the IP address
+     */
+    public function getIPChecker() : MnoDetectIPChecker
+    {
+        return $this->ipChecker;
+    }
+
+    /**
+     * @return MnoDetectHeaderEnrichment
+     * Class to include methods to extract msisdn from enriched header
+     */
+    public function getHeaderChecker() : MnoDetectHeaderEnrichment
+    {
+        return $this->headerChecker;
+    }
+
+    /**
+     * @return MnoDetectCrypt
+     * Class to include methods to extract msisdn from slingshot
+     * Applies to Cellc only (for now) - 07-02-18
+     */
+    public function getMCryptChecker() : MnoDetectCrypt
+    {
+        return $this->mcyptChecker;
     }
 
 }

@@ -12,6 +12,8 @@ require_once "vendor/autoload.php";
 
 use MCM\MCMDetection\MnoDetectMain as MnoMain;
 use MCM\MCMDetection\Libs\MnoDBConnection as DBConnection;
+use MCM\MCMDetection\Libs\MnoDetectIPChecker as IPChecker;
+use MCM\MCMDetection\Libs\MnoDetectHeaderEnrichment as HeaderChecker;
 
 use MCM\MCMDetection\Adapters\Http\Guzzle as MNOGuzzle;
 
@@ -45,19 +47,61 @@ class HyveMnoDetect {
         $this->client = new MnoMain([
             'config' => [
                 'db_username' => SELF::MNO_DB_USER,
-                'db_password' => SELF::MNO_DB_PASSWORD,
-                'db_database' => SELF::MNO_DB_DATABASE,
-                'db_server' => SELF::MNO_DB_SERVER,
             ],
             'adapters' => [
                 'httpAdapter' => new MNOGuzzle(),
             ],
             'helpers' => [
-                'MnoConnection' => new DBConnection(),
+                'dbConnection' => new DBConnection(
+                    SELF::MNO_DB_USER,
+                    SELF::MNO_DB_PASSWORD,
+                    SELF::MNO_DB_DATABASE,
+                    SELF::MNO_DB_SERVER
+                ),
+                'ipchecker' => new IPChecker(),
+                'headerChecker' => new HeaderChecker()
             ]
         ]);
+    }
 
-        $this->client->detect($payload);
+    public function detect($payload = null) : array
+    {
+
+        /**
+         * Run through test case scenarios
+         * Steps 1-4
+         */
+        if(empty($payload))
+        {
+            throw new Exception('No payload was provided!');
+        }
+
+        /** Go through header enrichment */
+        $headerChecker = $this->client->getHeaderChecker();
+        $msisdnResult = $headerChecker->getHeaderEnrichedMsisdn($payload);
+
+
+        /** Go through MCrypt */
+        if(empty($msisdnResult))
+        {
+            $mcryptChecker = $this->client->getMCryptChecker();
+            $msisdnResult = $mcryptChecker->somefunction();
+        }
+
+        /** Grab IP Address */
+        $ipChecker = $this->client->getIPChecker();
+        $ipResults = $ipChecker->check($payload);
+
+        /** If previous return null - user has to input msisdn */
+        if(empty($msisdnResult) && empty($ipResults))
+        {
+            return null;
+        }
+
+        return array (
+            'msisdn' => $msisdnResult,
+            'ipaddress' => $ipResults
+        );
 
     }
 

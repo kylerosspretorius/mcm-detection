@@ -20,9 +20,18 @@ class MnoDBConnection
 
     public $connection;
 
-    function __construct()
+    function __construct($user, $password, $database, $host = 'localhost')
     {
-        $this->connect();
+        $this->host = $host;
+        $this->user = $user;
+        $this->pass = $password;
+        $this->db = $database;
+
+
+        /** EXAMPLE OF USAGE
+         * $db = new DB('root', '', 'test');
+         * print_r($db->select('SELECT * FROM objects WHERE ID = ?', array(10), array('%d')));
+         */
     }
 
     function __destruct()
@@ -33,28 +42,117 @@ class MnoDBConnection
     function connect()
     {
 
-        $this->host = empty(defined('MNO_DB_SERVER')) ? 'localhost' : defined('MNO_DB_SERVER');
-        $this->user = empty(defined('MNO_DB_USER')) ? 'ubuntu' : defined('MNO_DB_USER');
-        $this->pass = empty(defined('MNO_DB_PASSWORD')) ? '' : defined('MNO_DB_PASSWORD');
-        $this->db = empty(defined('MNO_DB_DATABASE')) ? 'MCMCampaign' : defined('MNO_DB_DATABASE');
-
-        var_dump($this->host . ' ' .  $this->user . ' ' .  $this->pass . ' ' . $this->db);
         try {
 
             $this->connection = new \mysqli( $this->host, $this->user, $this->pass, $this->db );
-
 
         } catch (\Exception $e){
             $error = $e->getMessage();
             return $error;
         }
 
+
         return $this->connection;
     }
 
-    public function get_results($query)
+    public function query($query)
     {
-        return $this->connection->query($query);
+        $db = $this->connect();
+
+        $result = $db->query($query);
+
+        while ( $row = $result->fetch_object() )
+        {
+            $results[] = $row;
+        }
+
+        return $results;
+    }
+
+    public function select($query, $data = null, $format = null)
+    {
+        // Connect to the database
+        $db = $this->connect();
+
+        //Prepare our query for binding
+        $stmt = $db->prepare($query);
+
+        //Normalize format
+        $format = implode('', $format);
+        $format = str_replace('%', '', $format);
+
+        // Prepend $format onto $values
+        array_unshift($data, $format);
+
+        //Dynamically bind values
+        call_user_func_array( array( $stmt, 'bind_param'), $this->ref_values($data));
+
+        //Execute the query
+        $stmt->execute();
+
+        //Fetch results
+        $result = $stmt->get_result();
+
+        //Create results object
+        while ($row = $result->fetch_object()) {
+            $results[] = $row;
+        }
+        return $results;
+    }
+
+    public function delete($table, $id) {
+        // Connect to the database
+        $db = $this->connect();
+
+        // Prepary our query for binding
+        $stmt = $db->prepare("DELETE FROM {$table} WHERE ID = ?");
+
+        // Dynamically bind values
+        $stmt->bind_param('d', $id);
+
+        // Execute the query
+        $stmt->execute();
+
+        // Check for successful insertion
+        if ( $stmt->affected_rows ) {
+            return true;
+        }
+    }
+    private function prep_query($data, $type='insert')
+    {
+        // Instantiate $fields and $placeholders for looping
+        $fields = '';
+        $placeholders = '';
+        $values = array();
+
+        // Loop through $data and build $fields, $placeholders, and $values
+        foreach ( $data as $field => $value ) {
+            $fields .= "{$field},";
+            $values[] = $value;
+
+            if ( $type == 'update') {
+                $placeholders .= $field . '=?,';
+            } else {
+                $placeholders .= '?,';
+            }
+
+        }
+
+        // Normalize $fields and $placeholders for inserting
+        $fields = substr($fields, 0, -1);
+        $placeholders = substr($placeholders, 0, -1);
+
+        return array( $fields, $placeholders, $values );
+    }
+
+    private function ref_values($array)
+    {
+        $refs = array();
+        foreach ($array as $key => $value)
+        {
+            $refs[$key] = &$array[$key];
+        }
+        return $refs;
     }
 
     function close()
@@ -67,4 +165,6 @@ class MnoDBConnection
             return $error;
         }
     }
+
+
 }

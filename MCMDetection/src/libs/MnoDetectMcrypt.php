@@ -7,7 +7,7 @@
  */
 namespace MCM\MCMDetection\Libs;
 
-class MnoDetectCrypt
+class MnoDetectMcrypt
 {
 
 

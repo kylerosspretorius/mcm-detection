@@ -10,7 +10,7 @@
 namespace MCM\MCMDetection;
 
 
-use MCM\MCMDetection\Libs\MnoDetectCrypt;
+use MCM\MCMDetection\Libs\MnoDetectMcrypt;
 use MCM\MCMDetection\Libs\MnoDetectHeaderEnrichment;
 use MCM\MCMDetection\Libs\MnoDetectIPChecker;
 use MCM\MCMDetection\Libs\MnoLoader;
@@ -116,7 +116,7 @@ class MnoDetectMain
      * Class to include methods to extract msisdn from slingshot
      * Applies to Cellc only (for now) - 07-02-18
      */
-    public function getMCryptChecker() : MnoDetectCrypt
+    public function getMCryptChecker() : MnoDetectMcrypt
     {
         return $this->mcyptChecker;
     }
